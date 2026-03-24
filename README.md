@@ -15,14 +15,21 @@ Small command-line Bubble Sort app with two modes:
 ## Requirements
 
 - Python 3.10+
-- pytest
+- pip (bundled with Python)
 
-## Setup
+## Setup (Local Virtual Environment)
 
-Install test dependency:
+Create and activate a local virtual environment:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+Install dependencies from requirements.txt:
 
 ```bash
-python -m pip install pytest
+python -m pip install -r requirements.txt
 ```
 
 ## Run the Application
@@ -60,6 +67,12 @@ Suggested implementation order:
 
 ```bash
 python -m pytest -q
+```
+
+If your virtual environment is not activated, you can run directly with:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -q
 ```
 
 Windows launcher alternative:
