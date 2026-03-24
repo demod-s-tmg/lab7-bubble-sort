@@ -1,35 +1,32 @@
 """
-Bubble Sort Learning App - Upgraded Version
-Implements strict validation, retry loops, and verbose learning mode.
+Bubble Sort Learning App - Pro Visual Edition
+Implements ANSI redraw, index highlighting, and user-controlled animation.
 """
+
+import time
 
 def show_intro() -> None:
     print("\n" + "="*35)
-    print("=== Bubble Sort Learning App Pro ===")
+    print("=== Bubble Sort Visual ===")
     print("="*35)
     print("Type 'exit' at any time to quit.\n")
 
 
 def parse_numbers(raw_text: str) -> list[int]:
-    """
-    Converts text to integers with strict comma validation.
-    Raises ValueError with a specific message if format is wrong.
-    """
+    """Converts text to integers with strict comma validation."""
     if not raw_text.strip():
         raise ValueError("Input cannot be empty.")
     
     parts = raw_text.split(",")
     processed_numbers = []
-    
     for item in parts:
         clean_item = item.strip()
         if not clean_item:
-            raise ValueError("Empty token detected (e.g., '1,,2'). Use strict comma format.")
+            raise ValueError("Empty token detected (e.g., '1,,2').")
         try:
             processed_numbers.append(int(clean_item))
         except ValueError:
             raise ValueError(f"'{clean_item}' is not a valid integer.")
-            
     return processed_numbers
 
 
@@ -37,9 +34,44 @@ def needs_swap(left: int, right: int) -> bool:
     return left > right
 
 
-def bubble_sort(values: list[int], verbose: bool = True) -> list[int]:
+def clear_terminal_in_place() -> None:
+    """Uses ANSI escape codes to clear screen and move cursor to home."""
+    print("\033[H\033[J", end="")
+
+
+def render_bar_line(index: int, value: int, max_value: int, is_comparing: bool, bar_width: int = 40) -> str:
+    """Builds an ASCII bar line with highlighting."""
+    if max_value <= 0:
+        return f"{value:>3} |"
+
+    scaled = max(1, int((value / max_value) * bar_width)) if value > 0 else 0
+    bar = "#" * scaled
+    
+    if is_comparing:
+        return f"\033[33m{value:>3} | {bar} <--- COMPARING\033[0m"
+    return f"{value:>3} | {bar}"
+
+
+def render_animation_frame(values: list[int], pass_idx: int, comp_idx: int, is_swap: bool) -> None:
+    """Renders the current state of the sort with highlights."""
+    clear_terminal_in_place()
+    status = "\033[31mSWAPPING!\033[0m" if is_swap else "Comparing..."
+    
+    print("=== Bubble Sort Animation ===")
+    print(f"Pass: {pass_idx + 1} | Pair: ({comp_idx}, {comp_idx+1}) | Status: {status}")
+    print("-" * 45)
+
+    max_val = max(values) if values else 0
+    for idx, val in enumerate(values):
+        comparing = (idx == comp_idx or idx == comp_idx + 1)
+        print(render_bar_line(idx, val, max_val, comparing))
+    print("-" * 45)
+
+
+def bubble_sort(values: list[int], verbose: bool = False) -> list[int]:
     """
-    Sorts values and shows each pass if verbose is True.
+    Standard Bubble Sort implementation.
+    Fixed for pytest collection: Reintroduced as the primary sort target.
     """
     sorted_values = values.copy()
     n = len(sorted_values)
@@ -55,55 +87,70 @@ def bubble_sort(values: list[int], verbose: bool = True) -> list[int]:
             print(f"Pass {i + 1}: {sorted_values}")
             
         if not swapped:
-            if verbose: print("No swaps this pass. List is sorted early!")
             break
 
     return sorted_values
 
 
-def run_tests():
-    """Basic tests for validation and sorting logic."""
-    print("\n--- Running Internal Tests ---")
-    test_cases = [
-        ([], "Empty list"),
-        ([1], "Single element"),
-        ([1, 2, 3], "Already sorted"),
-        ([3, 2, 1], "Reverse sorted"),
-        ([2, 1, 2], "Duplicates")
-    ]
-    for case, label in test_cases:
-        result = bubble_sort(case, verbose=False)
-        print(f"Test {label}: {'Passed' if result == sorted(case) else 'Failed'}")
-    print("--- Tests Complete ---\n")
+def bubble_sort_animated(values: list[int], frame_delay: float) -> list[int]:
+    """Sorts with real-time ANSI animation."""
+    sorted_values = values.copy()
+    n = len(sorted_values)
+
+    for i in range(n - 1):
+        swapped_in_pass = False
+        for j in range(n - 1 - i):
+            if frame_delay > 0:
+                render_animation_frame(sorted_values, i, j, False)
+                time.sleep(frame_delay)
+
+            if needs_swap(sorted_values[j], sorted_values[j + 1]):
+                sorted_values[j], sorted_values[j + 1] = sorted_values[j + 1], sorted_values[j]
+                swapped_in_pass = True
+                
+                if frame_delay > 0:
+                    render_animation_frame(sorted_values, i, j, True)
+                    time.sleep(frame_delay)
+
+        if not swapped_in_pass:
+            break
+
+    return sorted_values
 
 
 def run_app() -> None:
     show_intro()
     
-    # Run tests automatically once on startup (Optional)
-    # run_tests()
-
     while True:
-        user_input = input("Enter numbers (e.g., 8, 3, 1) or 'exit': ").lower()
+        # Keep user_input raw for strict 'exit' check
+        user_input = input("\nEnter numbers (e.g., 8, 3, 1) or 'exit': ")
         
-        if user_input == 'exit':
+        if user_input.strip().lower() == "exit":
             print("Goodbye!")
             break
             
         try:
-            # 1, 2 & 3: Strict parse and error handling
             numbers = parse_numbers(user_input)
+            mode = input("Choose mode: (A)nimation or (V)erbose text? ").lower()
             
-            # 4: Verbose mode enabled by default
-            print("\nStarting Sort...")
-            sorted_numbers = bubble_sort(numbers, verbose=True)
-            
-            print(f"\nFinal Result: {sorted_numbers}\n" + "-"*20)
+            if mode == 'a':
+                speed_input = input("Choose speed: (1) Slow, (2) Medium, (3) Fast: ")
+                speeds = {"1": 0.5, "2": 0.2, "3": 0.05}
+                delay = speeds.get(speed_input, 0.2)
+                
+                print("\nStarting Animation...")
+                time.sleep(1) 
+                sorted_numbers = bubble_sort_animated(numbers, delay)
+            else:
+                # Use our own bubble_sort instead of built-in sorted()
+                print("\nStarting Standard Sort...")
+                sorted_numbers = bubble_sort(numbers, verbose=True)
+
+            print(f"\nFinal Sorted List: {sorted_numbers}")
+            print("-" * 20)
             
         except ValueError as e:
-            # Catching the error and allowing the loop to continue (Retry Loop)
             print(f"Invalid Input: {e} Please try again.")
-
 
 if __name__ == "__main__":
     run_app()
