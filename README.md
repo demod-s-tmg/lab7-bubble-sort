@@ -1,40 +1,36 @@
 # Bubble Sort Learning App
 
-A small Python command-line project to learn Bubble Sort step by step.
-
-The app includes:
-- strict input validation for comma-separated integers
-- verbose mode showing each Bubble Sort pass
-- retry loop for invalid input
-- basic pytest test suite
+A Python command-line app for learning Bubble Sort with two existing output styles:
+- verbose text mode (prints list state after each pass)
+- ANSI terminal animation mode (in-place redraw)
 
 ## Features
 
-- Parse and validate integer input like `8, 3, 1, 7`
-- Reject malformed inputs like `1,,2` and non-integers like `3, x, 5`
-- Sort using Bubble Sort with early-exit optimization
-- Show intermediate sorting passes for learning
-- Exit cleanly with `exit`
+- Strict parsing for comma-separated integers, for example: `8, 3, 1, 7`
+- Clear validation errors for malformed input like `1,,2` or `3, x, 5`
+- Bubble Sort with early-exit optimization
+- Interactive retry loop until `exit` is entered
+- Pytest suite with 5 tests
 
 ## Project Structure
 
-- `main.py`: CLI app and sorting logic
-- `tests/test_main.py`: pytest unit tests
-- `pytest.ini`: pytest configuration
+- `main.py`: CLI flow, parsing, Bubble Sort, and animation rendering
+- `tests/test_main.py`: unit tests for parsing and core sort logic
+- `pytest.ini`: pytest discovery configuration
 - `REPORT.md`: report file
 
 ## Requirements
 
 - Python 3.10+
-- pytest (for running tests)
+- pytest
 
-Install pytest:
+Install test dependency:
 
 ```bash
 python -m pip install pytest
 ```
 
-## Run The App
+## Running The App
 
 From the project root:
 
@@ -42,61 +38,48 @@ From the project root:
 python main.py
 ```
 
-On Windows, if needed:
+Windows alternative:
 
 ```powershell
 py main.py
 ```
 
-### Example Session
+## CLI Flow
 
-```text
-=== Bubble Sort Learning App Pro ===
-Type 'exit' at any time to quit.
+1. Enter numbers or type `exit`.
+2. Choose mode:
+	- `a` for animation
+	- any other input for verbose text mode
+3. If animation is selected, choose speed:
+	- `1` slow
+	- `2` medium
+	- `3` fast
 
-Enter numbers (e.g., 8, 3, 1) or 'exit': 8, 3, 1, 7
-
-Starting Sort...
-Pass 1: [3, 1, 7, 8]
-Pass 2: [1, 3, 7, 8]
-Pass 3: [1, 3, 7, 8]
-No swaps this pass. List is sorted early!
-
-Final Result: [1, 3, 7, 8]
-```
-
-## Run Tests
-
-From the project root:
+## Running Tests
 
 ```bash
 python -m pytest -q
 ```
 
-On Windows, if needed:
+Windows alternative:
 
 ```powershell
 py -m pytest -q
 ```
 
-Current suite contains 5 tests covering:
+Current tests cover:
 - valid parsing
 - empty token validation
 - non-integer validation
 - sorting correctness
-- preserving original input list
+- non-mutation of input list
 
-## How Bubble Sort Works
+## Bubble Sort Summary
 
-Bubble Sort repeatedly compares adjacent elements and swaps them if they are in the wrong order.
-After each full pass, the largest unsorted element moves to the end.
+Bubble Sort repeatedly compares adjacent elements and swaps them when needed.
+After each pass, the largest remaining unsorted value moves to the end.
 
 Complexity:
-- worst/average time: O(n^2)
-- best time (already sorted with early exit): O(n)
+- worst and average time: O(n^2)
+- best time with early exit: O(n)
 - space: O(1)
-
-## Notes
-
-In `main.py`, `run_tests()` is available as a small internal demo helper but is not automatically executed.
-For regular validation, prefer the pytest suite in `tests/test_main.py`.
